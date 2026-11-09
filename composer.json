@@ -1,0 +1,55 @@
+{
+    "name": "bale/pelatihan",
+    "description": "Manajemen permintaan pelatihan (masyarakat & perusahaan) untuk Bale CMS",
+    "keywords": [
+        "bale",
+        "laravel",
+        "pelatihan"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "bale",
+            "email": "ricky.romdhoni@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "illuminate/contracts": "^11.0||^12.0||^13.0",
+        "bale/cms": "*",
+        "bale/core": "*",
+        "bale/wara": "*"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.14",
+        "orchestra/testbench": "^11.0",
+        "pestphp/pest": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Bale\\Pelatihan\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Bale\\Pelatihan\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/pest",
+        "format": "vendor/bin/pint"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Bale\\Pelatihan\\PelatihanServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

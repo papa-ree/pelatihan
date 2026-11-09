@@ -1,0 +1,31 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('pelatihan_drafts', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->char('user_uuid', 36);
+            $table->uuid('period_id');
+            $table->string('type', 20); // masyarakat | perusahaan
+
+            $table->unsignedSmallInteger('step')->default(1);
+            $table->json('payload')->nullable();
+
+            $table->timestamps();
+
+            $table->unique(['user_uuid', 'period_id', 'type']);
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('pelatihan_drafts');
+    }
+};

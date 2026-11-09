@@ -1,0 +1,29 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('pelatihan_settings', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->text('gemini_api_key')->nullable();
+            $table->string('gemini_model')->default('gemini-3.1-flash-lite');
+
+            $table->string('email_subject')->nullable();
+            $table->text('email_body')->nullable();
+            $table->text('wa_body')->nullable();
+
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('pelatihan_settings');
+    }
+};

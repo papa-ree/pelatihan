@@ -1,0 +1,29 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * `users.username` dan `users.role` dibuat char(36) untuk UUID. Warga
+     * memakai username Keycloak (NIP/email) yang bisa lebih panjang, dan role
+     * `citizen` bukan UUID. Tidak ada kolom baru yang ditambahkan.
+     */
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('username', 255)->change();
+            $table->string('role', 255)->change();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->char('username', 36)->change();
+            $table->char('role', 36)->change();
+        });
+    }
+};

@@ -1,0 +1,25 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('pelatihan_submissions', function (Blueprint $table) {
+            // Klaster hasil analisis AI; null berarti belum/gagal dianalisis.
+            $table->uuid('cluster_id')->nullable()->after('period_id');
+            $table->index('cluster_id');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('pelatihan_submissions', function (Blueprint $table) {
+            $table->dropIndex(['cluster_id']);
+            $table->dropColumn('cluster_id');
+        });
+    }
+};

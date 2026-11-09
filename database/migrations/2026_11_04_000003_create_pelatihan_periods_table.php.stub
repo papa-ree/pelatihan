@@ -1,0 +1,37 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('pelatihan_periods', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->smallInteger('year');
+            $table->string('name');
+            $table->text('description')->nullable();
+
+            $table->date('starts_at')->nullable();
+            $table->date('ends_at')->nullable();
+
+            $table->boolean('is_active')->default(false);
+
+            // none | weekly | monthly - ditentukan saat periode dibuat.
+            $table->string('ai_schedule', 20)->default('none');
+            $table->timestamp('last_ai_run_at')->nullable();
+
+            $table->timestamps();
+
+            $table->index('is_active');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('pelatihan_periods');
+    }
+};
