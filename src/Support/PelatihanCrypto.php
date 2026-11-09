@@ -26,7 +26,7 @@ final class PelatihanCrypto
 
         if ($key === '') {
             throw new RuntimeException(
-                'PELATIHAN_DATA_KEY belum diisi. Jalankan: php artisan pelatihan:install'
+                'PELATIHAN_DATA_KEY belum diisi di .env. Nilainya harus sama dengan bale-front.'
             );
         }
 

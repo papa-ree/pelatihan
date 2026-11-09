@@ -6,6 +6,7 @@ use Bale\Pelatihan\Commands\AnalyzePeriod;
 use Bale\Pelatihan\Commands\InstallPelatihan;
 use Bale\Pelatihan\Commands\MigratePelatihan;
 use Bale\Pelatihan\Commands\PublishConfigPelatihan;
+use Bale\Pelatihan\Commands\PublishMigrationsPelatihan;
 use Bale\Pelatihan\Listeners\MarkProgramNotificationFailed;
 use Bale\Pelatihan\Listeners\MarkProgramNotificationSent;
 use Illuminate\Console\Scheduling\Schedule;
@@ -32,6 +33,7 @@ class PelatihanServiceProvider extends ServiceProvider
         $commands = [
             'command.pelatihan:install' => InstallPelatihan::class,
             'command.pelatihan:migrate' => MigratePelatihan::class,
+            'command.pelatihan:publish-migrations' => PublishMigrationsPelatihan::class,
             'command.pelatihan:publish-config' => PublishConfigPelatihan::class,
             'command.pelatihan:analyze' => AnalyzePeriod::class,
         ];

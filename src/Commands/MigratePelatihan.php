@@ -13,10 +13,19 @@ class MigratePelatihan extends Command
 {
     protected $signature = 'pelatihan:migrate {--tenant= : The slug of the tenant}';
 
-    protected $description = 'Publish Pelatihan migrations and run them for a specific tenant database';
+    protected $description = 'Run Pelatihan migrations for a specific tenant database';
 
     public function handle(): int
     {
+        $path = 'database/migrations/pelatihan';
+        $published = glob(base_path($path.'/*.php')) ?: [];
+
+        if ($published === []) {
+            $this->error('Migrasi belum dipublikasikan. Jalankan dulu: php artisan pelatihan:publish-migrations');
+
+            return self::FAILURE;
+        }
+
         $tenantSlug = $this->option('tenant');
 
         if (! $tenantSlug) {
@@ -37,12 +46,6 @@ class MigratePelatihan extends Command
         try {
             $tenant = BaleList::where('slug', $tenantSlug)->firstOrFail();
 
-            $this->info('Publishing Pelatihan migrations...');
-            $this->call('vendor:publish', [
-                '--tag' => 'pelatihan:migrations',
-                '--force' => true,
-            ]);
-
             TenantManager::initializeFromBaleUuid($tenant->id);
             $connection = TenantManager::getActiveConnection();
 
@@ -54,7 +57,7 @@ class MigratePelatihan extends Command
 
             $this->call('migrate', [
                 '--database' => $connection,
-                '--path' => 'database/migrations/pelatihan',
+                '--path' => $path,
                 '--force' => true,
             ]);
 

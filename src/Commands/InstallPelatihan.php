@@ -17,34 +17,36 @@ class InstallPelatihan extends Command
 
     public function handle(): int
     {
-        if (! config('pelatihan.data_key')) {
-            $this->error('PELATIHAN_DATA_KEY belum diisi di .env. Nilai harus sama dengan bale-front.');
-
-            return self::FAILURE;
-        }
-
         $option = $this->choice(
             'What would you like to install/run?',
             [
-                0 => 'All (Config, Migrations, Permissions & Settings)',
+                0 => 'All (Config, Migrations & Permissions)',
                 1 => 'Publish Config Only',
-                2 => 'Permissions Only',
+                2 => 'Role & Permissions Only',
                 3 => 'Migrations Only',
             ],
             0
         );
 
+        $all = in_array($option, ['All (Config, Migrations & Permissions)', 0], true);
+
         try {
-            if (in_array($option, ['All (Config, Migrations, Permissions & Settings)', 'Publish Config Only', 0, 1], true)) {
+            if ($all || in_array($option, ['Publish Config Only', 1], true)) {
                 $this->call('pelatihan:publish-config', ['--force' => true]);
             }
 
-            if (in_array($option, ['All (Config, Migrations, Permissions & Settings)', 'Permissions Only', 0, 2], true)) {
+            if ($all || in_array($option, ['Role & Permissions Only', 2], true)) {
                 $this->seedPermissions();
             }
 
-            if (in_array($option, ['All (Config, Migrations, Permissions & Settings)', 'Migrations Only', 0, 3], true)) {
-                $this->call('pelatihan:migrate', ['--tenant' => $this->option('tenant')]);
+            if ($all || in_array($option, ['Migrations Only', 3], true)) {
+                if ($this->call('pelatihan:publish-migrations', ['--force' => true]) !== self::SUCCESS) {
+                    return self::FAILURE;
+                }
+
+                if ($this->call('pelatihan:migrate', ['--tenant' => $this->option('tenant')]) !== self::SUCCESS) {
+                    return self::FAILURE;
+                }
             }
 
             $this->info('  Installation step(s) completed successfully.');
