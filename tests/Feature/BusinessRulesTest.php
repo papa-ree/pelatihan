@@ -1,5 +1,6 @@
 <?php
 
+use Bale\Pelatihan\Jobs\RunPeriodAnalysisJob;
 use Bale\Pelatihan\Listeners\MarkProgramNotificationFailed;
 use Bale\Pelatihan\Listeners\MarkProgramNotificationSent;
 use Bale\Pelatihan\Models\CitizenProfile;
@@ -71,6 +72,7 @@ beforeEach(function () {
         $table->string('email_subject')->nullable();
         $table->text('email_body')->nullable();
         $table->text('wa_body')->nullable();
+        $table->boolean('whatsapp_enabled')->default(false);
         $table->timestamps();
     });
 
@@ -227,7 +229,7 @@ it('membuat CitizenUser bisa menerima notifikasi', function () {
 });
 
 it('memilih kanal notifikasi sesuai tujuan yang tersedia', function () {
-    $subject = new PelatihanProgramPublished('p', 'u', 'Subjek', 'Email', 'WA');
+    $subject = new PelatihanProgramPublished('p', 'u', 'Subjek', 'Email', 'WA', true);
 
     $emailOnly = new CitizenUser(['email' => 'a@example.com']);
     $emailOnly->setRelation('profile', new CitizenProfile);
@@ -237,6 +239,39 @@ it('memilih kanal notifikasi sesuai tujuan yang tersedia', function () {
 
     expect($subject->via($emailOnly))->toBe(['mail'])
         ->and($subject->via($waOnly))->toBe(['wara']);
+});
+
+it('melewati kanal WhatsApp saat toggle dimatikan', function () {
+    $notification = new PelatihanProgramPublished('p', 'u', 'Subjek', 'Email', 'WA');
+
+    $user = new CitizenUser(['email' => 'a@example.com']);
+    $user->setRelation('profile', new CitizenProfile(['whatsapp' => '628123456789']));
+
+    $waOnly = new CitizenUser(['email' => null]);
+    $waOnly->setRelation('profile', new CitizenProfile(['whatsapp' => '628123456789']));
+
+    expect($notification->via($user))->toBe(['mail'])
+        ->and($notification->via($waOnly))->toBe([]);
+});
+
+it('menyamarkan NIK dan nomor WhatsApp sebelum dikirim ke AI', function () {
+    $period = Period::create(['year' => 2026, 'name' => 'Semester 2']);
+
+    $submission = new Submission(['data' => [
+        'kebutuhan' => 'NIK 3502212004120001, WA 081234567890, ingin kursus menjahit.',
+        'pekerjaan' => 'Ibu rumah tangga',
+    ]]);
+    $submission->id = (string) Str::uuid();
+    $submission->type = 'masyarakat';
+
+    $job = new RunPeriodAnalysisJob((string) Str::uuid(), $period->id);
+
+    $prompt = (new ReflectionMethod($job, 'prompt'))->invoke($job, $period, collect([$submission]));
+
+    expect($prompt)->not->toContain('3502212004120001')
+        ->and($prompt)->not->toContain('081234567890')
+        ->and($prompt)->toContain('[NIK]')
+        ->and($prompt)->toContain('[nomor]');
 });
 
 it('menandai log terkirim per kanal tanpa menimpa kegagalan lain', function () {

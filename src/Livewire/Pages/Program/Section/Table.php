@@ -64,7 +64,7 @@ class Table extends Component
 
         $setting = Setting::current();
 
-        if (blank($setting->email_subject) && blank($setting->wa_body)) {
+        if (blank($setting->email_subject) && (! $setting->whatsapp_enabled || blank($setting->wa_body))) {
             $this->dispatch('toast', message: __('Template notifikasi belum diisi. Buka Pengaturan Pelatihan.'), type: 'error');
 
             return;

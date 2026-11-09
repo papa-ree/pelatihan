@@ -63,10 +63,13 @@ class SendProgramNotificationToUserJob implements ShouldQueue
             return;
         }
 
-        // Jangan buat log untuk kanal yang tujuannya memang tidak ada.
+        $setting = Setting::current();
+
+        // Jangan buat log untuk kanal yang tujuannya memang tidak ada atau
+        // sudah dimatikan admin.
         $channels = array_values(array_filter([
             filled($user->email) ? 'email' : null,
-            filled($user->profile?->whatsapp) ? 'whatsapp' : null,
+            $setting->whatsapp_enabled && filled($user->profile?->whatsapp) ? 'whatsapp' : null,
         ]));
 
         if ($channels === []) {
@@ -99,8 +102,6 @@ class SendProgramNotificationToUserJob implements ShouldQueue
             );
         }
 
-        $setting = Setting::current();
-
         try {
             $user->notify(new PelatihanProgramPublished(
                 $program->id,
@@ -108,6 +109,7 @@ class SendProgramNotificationToUserJob implements ShouldQueue
                 NotificationTemplate::render($setting->email_subject, $program, $user),
                 NotificationTemplate::render($setting->email_body, $program, $user),
                 NotificationTemplate::render($setting->wa_body, $program, $user),
+                (bool) $setting->whatsapp_enabled,
             ));
         } finally {
             // Baris yang masih `queued` berarti kanalnya tidak pernah melapor

@@ -20,6 +20,7 @@ class PelatihanProgramPublished extends Notification
         public string $subject,
         public string $emailBody,
         public string $waBody,
+        public bool $whatsappEnabled = false,
     ) {}
 
     /**
@@ -31,7 +32,7 @@ class PelatihanProgramPublished extends Notification
         // exception dan menghabiskan jatah retry peserta itu.
         return array_values(array_filter([
             // WhatsApp lebih dulu supaya kegagalan mail tidak membatalkan kanal WA.
-            filled($notifiable->toWara()) ? 'wara' : null,
+            $this->whatsappEnabled && filled($notifiable->toWara()) ? 'wara' : null,
             filled($notifiable->email) ? 'mail' : null,
         ]));
     }

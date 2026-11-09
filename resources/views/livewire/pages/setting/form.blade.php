@@ -34,6 +34,17 @@
 
                     <x-core::input label="{{ __('Subjek Email') }}" wire:model="email_subject" required />
                     <x-core::textarea label="{{ __('Isi Email') }}" wire:model="email_body" rows="6" required />
+
+                    <div>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <x-core::checkbox wire:model="whatsapp_enabled" />
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Kirim notifikasi WhatsApp') }}</span>
+                        </label>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            {{ __('Kalau mati, peserta hanya menerima email.') }}
+                        </p>
+                    </div>
+
                     <x-core::textarea label="{{ __('Isi WhatsApp') }}" wire:model="wa_body" rows="4" required />
 
                     <div class="flex justify-end border-t border-gray-200 pt-5 dark:border-gray-700">

@@ -22,6 +22,8 @@ class Form extends Component
 
     public ?string $wa_body = null;
 
+    public bool $whatsapp_enabled = false;
+
     public function mount(): void
     {
         TenantConnectionService::ensureActive();
@@ -36,6 +38,7 @@ class Form extends Component
         $this->email_subject = $setting->email_subject;
         $this->email_body = $setting->email_body;
         $this->wa_body = $setting->wa_body;
+        $this->whatsapp_enabled = (bool) $setting->whatsapp_enabled;
     }
 
     public function save(): void
@@ -52,6 +55,7 @@ class Form extends Component
             'email_subject' => 'required|string|max:255',
             'email_body' => 'required|string',
             'wa_body' => 'required|string',
+            'whatsapp_enabled' => 'boolean',
         ]);
 
         $setting = Setting::current();
@@ -61,6 +65,7 @@ class Form extends Component
             'email_subject' => $this->email_subject,
             'email_body' => $this->email_body,
             'wa_body' => $this->wa_body,
+            'whatsapp_enabled' => $this->whatsapp_enabled,
         ];
 
         // Kosong berarti tidak diubah.

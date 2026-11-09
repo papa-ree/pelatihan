@@ -193,8 +193,8 @@ class RunPeriodAnalysisJob implements ShouldQueue
         $rows = $submissions->map(fn (Submission $submission) => [
             'id' => $submission->id,
             'jenis' => $submission->type,
-            'kebutuhan' => (string) ($submission->data['kebutuhan'] ?? ''),
-            'pekerjaan' => (string) ($submission->data['pekerjaan'] ?? $submission->data['bidang_usaha'] ?? ''),
+            'kebutuhan' => $this->redact((string) ($submission->data['kebutuhan'] ?? '')),
+            'pekerjaan' => $this->redact((string) ($submission->data['pekerjaan'] ?? $submission->data['bidang_usaha'] ?? '')),
             'jumlah_tenaga_kerja' => $submission->data['jumlah_tenaga_kerja'] ?? null,
         ])->values()->all();
 
@@ -213,5 +213,17 @@ class RunPeriodAnalysisJob implements ShouldQueue
             'Data permintaan:',
             json_encode($rows, JSON_UNESCAPED_UNICODE),
         ]);
+    }
+
+    /**
+     * Field ini diketik warga, jadi NIK/nomor WhatsApp bisa ikut terbawa.
+     * Nama dan alamat tidak bisa dideteksi andal; jaminannya ada pada
+     * allowlist field di prompt(), bukan pada saringan ini.
+     */
+    private function redact(string $text): string
+    {
+        $text = preg_replace('/\b\d{16}\b/', '[NIK]', $text) ?? $text;
+
+        return preg_replace('/(?:\+62|62|0)8\d{7,12}/', '[nomor]', $text) ?? $text;
     }
 }

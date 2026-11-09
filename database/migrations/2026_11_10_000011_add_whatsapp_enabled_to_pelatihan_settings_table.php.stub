@@ -1,0 +1,23 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('pelatihan_settings', function (Blueprint $table) {
+            // Mati secara default: WhatsApp hanya dikirim setelah admin menyalakannya.
+            $table->boolean('whatsapp_enabled')->default(false)->after('wa_body');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('pelatihan_settings', function (Blueprint $table) {
+            $table->dropColumn('whatsapp_enabled');
+        });
+    }
+};

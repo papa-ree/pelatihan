@@ -52,7 +52,7 @@ class SendProgramNotificationJob implements ShouldQueue
         $setting = Setting::current();
 
         // Template kosong akan menghasilkan pesan kosong; jangan antrekan.
-        if (blank($setting->email_subject) && blank($setting->wa_body)) {
+        if (blank($setting->email_subject) && (! $setting->whatsapp_enabled || blank($setting->wa_body))) {
             return;
         }
 

@@ -20,10 +20,12 @@ class Setting extends Model
         'email_subject',
         'email_body',
         'wa_body',
+        'whatsapp_enabled',
     ];
 
     protected $casts = [
         'gemini_api_key' => PelatihanEncrypted::class,
+        'whatsapp_enabled' => 'boolean',
     ];
 
     protected $hidden = [
