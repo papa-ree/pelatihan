@@ -3,7 +3,7 @@
 namespace Bale\Pelatihan\Livewire\Pages\Citizen;
 
 use Bale\Cms\Services\TenantConnectionService;
-use Bale\Pelatihan\Support\PelatihanCrypto;
+use Bale\Pelatihan\Models\CitizenProfile;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -12,10 +12,6 @@ use Livewire\Component;
 #[Title('Masyarakat')]
 class Index extends Component
 {
-    public string $nik = '';
-
-    public ?string $nikHash = null;
-
     public function mount(): void
     {
         TenantConnectionService::ensureActive();
@@ -25,25 +21,15 @@ class Index extends Component
         }
     }
 
-    /**
-     * NIK terenkripsi tidak bisa di-LIKE, jadi pencarian memakai hash
-     * exact-match.
-     */
-    public function search(): void
-    {
-        $this->validate(['nik' => 'nullable|digits:16']);
-
-        $this->nikHash = $this->nik === '' ? null : PelatihanCrypto::hash($this->nik);
-    }
-
-    public function clear(): void
-    {
-        $this->nik = '';
-        $this->nikHash = null;
-    }
-
     public function render()
     {
-        return view('pelatihan::livewire.pages.citizen.index');
+        $total = CitizenProfile::query()->count();
+        $complete = CitizenProfile::query()->whereNotNull('completed_at')->count();
+
+        return view('pelatihan::livewire.pages.citizen.index', [
+            'totalCitizens' => $total,
+            'completeProfiles' => $complete,
+            'incompleteProfiles' => $total - $complete,
+        ]);
     }
 }

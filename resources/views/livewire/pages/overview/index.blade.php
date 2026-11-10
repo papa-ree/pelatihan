@@ -25,25 +25,39 @@
             </x-slot>
         </x-core::page-header>
 
+        @php
+            $periodBadge = $period ? __('Periode :year', ['year' => $period->year]) : __('Tanpa periode');
+        @endphp
+
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            @foreach([
-                ['label' => __('Permintaan'), 'value' => $totalSubmissions, 'icon' => 'inbox'],
-                ['label' => __('Klaster'), 'value' => $totalClusters, 'icon' => 'boxes'],
-                ['label' => __('Klaster Disetujui'), 'value' => $approvedClusters, 'icon' => 'check-check'],
-                ['label' => __('Program Terbit'), 'value' => $publishedPrograms, 'icon' => 'book-open-check'],
-            ] as $card)
-                <x-core::stat-card>
-                    <x-slot:icon>
-                        <x-dynamic-component :component="'lucide-'.$card['icon']" class="size-6 text-gray-500 dark:text-gray-400" />
-                    </x-slot:icon>
-                    <x-slot:title>
-                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ $card['label'] }}</span>
-                    </x-slot:title>
-                    <x-slot:data>
-                        <div class="text-2xl font-bold tabular-nums text-gray-900 dark:text-white">{{ number_format($card['value']) }}</div>
-                    </x-slot:data>
-                </x-core::stat-card>
-            @endforeach
+            <x-core::stat-card-gradient
+                :label="__('Permintaan')"
+                :value="number_format($totalSubmissions)"
+                icon="inbox"
+                tone="teal"
+                :badge="$periodBadge"
+                :hint="__('Masuk pada periode aktif')" />
+
+            <x-core::stat-card-gradient
+                :label="__('Klaster')"
+                :value="number_format($totalClusters)"
+                icon="boxes"
+                tone="indigo"
+                :hint="__('Hasil analisis AI')" />
+
+            <x-core::stat-card-gradient
+                :label="__('Klaster Disetujui')"
+                :value="number_format($approvedClusters)"
+                icon="check-check"
+                tone="emerald"
+                :hint="__('Siap dibuat program')" />
+
+            <x-core::stat-card-gradient
+                :label="__('Program Terbit')"
+                :value="number_format($publishedPrograms)"
+                icon="book-open-check"
+                tone="sky"
+                :hint="__('Sudah diumumkan')" />
         </div>
 
         {{-- Progres analisis AI periode aktif --}}

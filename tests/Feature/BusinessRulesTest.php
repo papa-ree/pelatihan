@@ -12,6 +12,7 @@ use Bale\Pelatihan\Models\Program;
 use Bale\Pelatihan\Models\Setting;
 use Bale\Pelatihan\Models\Submission;
 use Bale\Pelatihan\Notifications\PelatihanProgramPublished;
+use Bale\Pelatihan\Support\CitizenSearch;
 use Bale\Pelatihan\Support\NotificationTemplate;
 use Bale\Pelatihan\Support\PelatihanCrypto;
 use Illuminate\Database\QueryException;
@@ -311,4 +312,30 @@ it('menandai log terkirim per kanal tanpa menimpa kegagalan lain', function () {
         ->and($email->fresh()->status)->toBe('sent')
         ->and($email->fresh()->sent_at)->not->toBeNull()
         ->and($email->fresh()->error)->toBeNull();
+});
+
+it('mencari warga lewat NIK 16 digit dan LIKE untuk input lain', function () {
+    $alpha = CitizenProfile::create([
+        'user_uuid' => (string) Str::uuid(),
+        'sso_subject' => 'alpha-user',
+        'nik' => '3502212004120001',
+    ]);
+
+    $beta = CitizenProfile::create([
+        'user_uuid' => (string) Str::uuid(),
+        'sso_subject' => 'beta-user',
+        'nik' => '3502212004120002',
+    ]);
+
+    $byNik = CitizenProfile::query();
+    CitizenSearch::apply($byNik, '3502212004120002', ['sso_subject']);
+    expect($byNik->pluck('id')->all())->toBe([$beta->id]);
+
+    $bySubject = CitizenProfile::query();
+    CitizenSearch::apply($bySubject, 'alpha', ['sso_subject']);
+    expect($bySubject->pluck('id')->all())->toBe([$alpha->id]);
+
+    $unknownNik = CitizenProfile::query();
+    CitizenSearch::apply($unknownNik, '3502212004129999', ['sso_subject']);
+    expect($unknownNik->count())->toBe(0);
 });

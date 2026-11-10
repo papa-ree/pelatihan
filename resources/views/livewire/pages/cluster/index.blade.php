@@ -29,56 +29,40 @@
         </div>
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <x-core::stat-card>
-                <x-slot:icon>
-                    <x-lucide-hourglass class="size-6 text-gray-500 dark:text-gray-400" />
-                </x-slot:icon>
-                <x-slot:title>
-                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('Klaster Menunggu') }}</span>
-                </x-slot:title>
-                <x-slot:data>
-                    <div class="text-2xl font-bold tabular-nums text-amber-600 dark:text-amber-400">{{ $counts['pending'] }}</div>
-                </x-slot:data>
-            </x-core::stat-card>
+            <x-core::stat-card-gradient
+                :label="__('Klaster Menunggu')"
+                :value="$counts['pending']"
+                icon="hourglass"
+                tone="amber"
+                :hint="__('Belum diputuskan')" />
 
-            <x-core::stat-card>
-                <x-slot:icon>
-                    <x-lucide-check-check class="size-6 text-gray-500 dark:text-gray-400" />
-                </x-slot:icon>
-                <x-slot:title>
-                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('Klaster Disetujui') }}</span>
-                </x-slot:title>
-                <x-slot:data>
-                    <div class="text-2xl font-bold tabular-nums text-teal-600 dark:text-teal-400">{{ $counts['approved'] }}</div>
-                </x-slot:data>
-            </x-core::stat-card>
+            <x-core::stat-card-gradient
+                :label="__('Klaster Disetujui')"
+                :value="$counts['approved']"
+                icon="check-check"
+                tone="emerald"
+                :hint="__('Siap dibuat program')" />
 
-            <x-core::stat-card>
-                <x-slot:icon>
-                    <x-lucide-clock class="size-6 text-gray-500 dark:text-gray-400" />
-                </x-slot:icon>
-                <x-slot:title>
-                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('Belum Dianalisis') }}</span>
-                </x-slot:title>
-                <x-slot:data>
-                    <div class="text-2xl font-bold tabular-nums text-gray-900 dark:text-white">{{ $pendingAi }}</div>
-                </x-slot:data>
-            </x-core::stat-card>
+            <x-core::stat-card-gradient
+                :label="__('Belum Dianalisis')"
+                :value="$pendingAi"
+                icon="clock"
+                tone="indigo"
+                :hint="__('Permintaan menunggu AI')" />
         </div>
 
-        <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="bg-gray-50/60 dark:bg-gray-800/40">
-                    <tr class="text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                        <th class="px-4 py-3">{{ __('Klaster') }}</th>
-                        <th class="hidden px-4 py-3 lg:table-cell">{{ __('Kata Kunci') }}</th>
-                        <th class="px-4 py-3 text-center">{{ __('Urgensi') }}</th>
-                        <th class="px-4 py-3 text-center">{{ __('Anggota') }}</th>
-                        <th class="px-4 py-3">{{ __('Status') }}</th>
-                        <th class="px-4 py-3">{{ __('Aksi') }}</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+        <x-core::table>
+            <x-slot:thead>
+                <tr class="text-left">
+                    <x-core::table-th :label="__('Klaster')" />
+                    <x-core::table-th :label="__('Kata Kunci')" class="hidden lg:table-cell" />
+                    <x-core::table-th :label="__('Urgensi')" align="center" />
+                    <x-core::table-th :label="__('Anggota')" align="center" />
+                    <x-core::table-th :label="__('Status')" />
+                    <x-core::table-th :label="__('Aksi')" />
+                </tr>
+            </x-slot:thead>
+            <x-slot:tbody>
                     @forelse($clusters as $cluster)
                         <tr wire:key="cluster-row-{{ $cluster->id }}"
                             class="align-top transition-colors duration-150 hover:bg-gray-50/80 dark:hover:bg-gray-700/40">
@@ -184,8 +168,7 @@
                             </td>
                         </tr>
                     @endforelse
-                </tbody>
-            </table>
-        </div>
+            </x-slot:tbody>
+        </x-core::table>
     </div>
 </div>
