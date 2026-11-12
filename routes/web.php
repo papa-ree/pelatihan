@@ -2,6 +2,7 @@
 
 use Bale\Cms\Middleware\EnsureBaleSelected;
 use Bale\Cms\Middleware\SwitchBaleConnection;
+use Bale\Pelatihan\Http\Controllers\AnalysisStatusController;
 use Bale\Pelatihan\Http\Controllers\PeriodExportController;
 use Bale\Pelatihan\Livewire\Pages\Citizen\Index as CitizenIndex;
 use Bale\Pelatihan\Livewire\Pages\Cluster\Index as ClusterIndex;
@@ -28,6 +29,10 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['web', 'auth'])->prefix('cms/pelatihan')->name('pelatihan.')->group(function () {
     Route::middleware([EnsureBaleSelected::class, SwitchBaleConnection::class])->group(function () {
         Route::get('/overview', OverviewIndex::class)->name('overview');
+
+        Route::get('/analysis-status', AnalysisStatusController::class)
+            ->middleware('can:pelatihan.read')
+            ->name('analysis.status');
 
         Route::prefix('periods')->name('period.')->group(function () {
             Route::get('/', PeriodIndex::class)->name('index');

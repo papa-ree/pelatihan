@@ -9,6 +9,7 @@ use Bale\Pelatihan\Models\Period;
 use Bale\Pelatihan\Models\Setting;
 use Bale\Pelatihan\Models\Submission;
 use Bale\Pelatihan\Services\GeminiClient;
+use Bale\Pelatihan\Support\AnalysisState;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -58,6 +59,8 @@ class RunPeriodAnalysisJob implements ShouldQueue
             return;
         }
 
+        AnalysisState::start($this->periodId);
+
         $setting = Setting::current();
 
         if (blank($setting->gemini_api_key)) {
@@ -80,6 +83,17 @@ class RunPeriodAnalysisJob implements ShouldQueue
             });
 
         $period->forceFill(['last_ai_run_at' => now()])->save();
+
+        AnalysisState::finish($this->periodId);
+    }
+
+    /**
+     * Job gagal total (tries=1): penanda "berjalan" harus dicabut agar
+     * halaman tidak menampilkan antrean yang sudah mati.
+     */
+    public function failed(?Throwable $e): void
+    {
+        AnalysisState::finish($this->periodId);
     }
 
     /**

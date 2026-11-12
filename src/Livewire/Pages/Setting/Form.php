@@ -54,8 +54,21 @@ class Form extends Component
             'gemini_api_key' => 'nullable|string|max:255',
             'email_subject' => 'required|string|max:255',
             'email_body' => 'required|string',
-            'wa_body' => 'required|string',
+            // Template WhatsApp hanya wajib saat kanalnya dinyalakan.
+            'wa_body' => 'nullable|string|required_if:whatsapp_enabled,true',
             'whatsapp_enabled' => 'boolean',
+        ], [
+            'required' => __(':attribute wajib diisi.'),
+            'required_if' => __(':attribute wajib diisi saat notifikasi WhatsApp aktif.'),
+            'max' => __(':attribute maksimal :max karakter.'),
+            'boolean' => __(':attribute tidak valid.'),
+        ], [
+            'gemini_model' => __('Model Gemini'),
+            'gemini_api_key' => __('Gemini API Key'),
+            'email_subject' => __('Subjek Email'),
+            'email_body' => __('Isi Email'),
+            'wa_body' => __('Isi WhatsApp'),
+            'whatsapp_enabled' => __('Notifikasi WhatsApp'),
         ]);
 
         $setting = Setting::current();
@@ -81,8 +94,12 @@ class Form extends Component
 
     public function render()
     {
+        $setting = Setting::current();
+
         return view('pelatihan::livewire.pages.setting.form', [
-            'hasApiKey' => filled(Setting::current()->gemini_api_key),
+            'hasApiKey' => filled($setting->gemini_api_key),
+            'updatedAt' => $setting->updated_at,
+            'canUpdate' => auth()->user()->can('pelatihan.settings.update'),
         ]);
     }
 }
