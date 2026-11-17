@@ -41,6 +41,7 @@ class Index extends Component
             'pendingSubmissions' => (int) $counts->get(Submission::STATUS_PENDING, 0),
             'processedSubmissions' => (int) $counts->get(Submission::STATUS_PROCESSED, 0),
             'failedSubmissions' => (int) $counts->get(Submission::STATUS_FAILED, 0),
+            'outOfScopeSubmissions' => (int) $counts->get(Submission::STATUS_OUT_OF_SCOPE, 0),
             'periodOptions' => $periods
                 ->map(fn (Period $period) => [
                     'label' => $period->year.' — '.$period->name,

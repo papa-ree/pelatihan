@@ -69,6 +69,10 @@
                                 'label' => __('Gagal'),
                                 'class' => 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/20 dark:text-rose-300 dark:border-rose-800/40',
                             ],
+                            \Bale\Pelatihan\Models\Submission::STATUS_OUT_OF_SCOPE => [
+                                'label' => __('Di luar cakupan'),
+                                'class' => 'bg-indigo-50 text-indigo-700 border-indigo-100 dark:bg-indigo-900/20 dark:text-indigo-300 dark:border-indigo-800/40',
+                            ],
                             default => [
                                 'label' => __('Menunggu AI'),
                                 'class' => 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800/40',
@@ -84,7 +88,9 @@
                         {{ __('Periode') }}: {{ $submission->period?->name }} ({{ $submission->period?->year }})
                     </p>
                     @if($submission->ai_error)
-                        <p class="mt-2 text-xs text-rose-600 dark:text-rose-400">{{ $submission->ai_error }}</p>
+                        <p class="mt-2 text-xs {{ $submission->status === \Bale\Pelatihan\Models\Submission::STATUS_OUT_OF_SCOPE ? 'text-gray-500 dark:text-gray-400' : 'text-rose-600 dark:text-rose-400' }}">
+                            {{ $submission->ai_error }}
+                        </p>
                     @endif
                 </div>
             </div>

@@ -6,28 +6,57 @@
     <div class="mt-6 space-y-4">
         <x-core::page-header
             :title="$programId ? __('Edit Program') : __('Program Baru')"
-            :subtitle="__('Hanya klaster yang disetujui yang bisa dijadikan program.')" />
+            :subtitle="__('Pilih periode dulu, lalu klaster yang disetujui pada periode tersebut.')" />
 
         <div class="max-w-4xl space-y-4">
             <x-core::page-container>
                 <form wire:submit="save" class="space-y-5">
                     <x-core::input label="{{ __('Nama Program') }}" wire:model="name" required />
 
-                    <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
-                        <x-core::select-dropdown
-                            label="{{ __('Klaster') }}"
-                            model="cluster_id"
-                            :items="$clusterOptions"
-                            labelField="label"
-                            valueField="value"
-                            placeholder="{{ __('Pilih klaster disetujui') }}" />
+                    <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                        <div>
+                            <x-core::select-dropdown
+                                label="{{ __('Periode') }}"
+                                model="period_id"
+                                :items="$periodOptions"
+                                labelField="label"
+                                valueField="value"
+                                placeholder="{{ __('Pilih periode') }}" />
 
+                            @error('period_id')
+                                <p class="mt-1.5 text-xs font-medium text-rose-600 dark:text-rose-400">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div wire:key="cluster-select-{{ $period_id ?: 'none' }}">
+                            <x-core::select-dropdown
+                                label="{{ __('Klaster') }}"
+                                model="cluster_id"
+                                :items="$clusterOptions"
+                                labelField="label"
+                                valueField="value"
+                                placeholder="{{ __('Pilih klaster disetujui') }}" />
+
+                            @error('cluster_id')
+                                <p class="mt-1.5 text-xs font-medium text-rose-600 dark:text-rose-400">{{ $message }}</p>
+                            @enderror
+
+                            @if ($period_id === '')
+                                <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                                    {{ __('Pilih periode dulu untuk melihat klasternya.') }}
+                                </p>
+                            @elseif (empty($clusterOptions))
+                                <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                                    {{ __('Periode ini belum punya klaster yang disetujui.') }}
+                                </p>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
                         <x-core::input type="number" label="{{ __('Tahun') }}" wire:model="year" required />
                         <x-core::input type="number" label="{{ __('Quarter (1-4)') }}" wire:model="quarter" required />
                     </div>
-                    @error('cluster_id')
-                        <p class="text-xs font-medium text-rose-600 dark:text-rose-400">{{ $message }}</p>
-                    @enderror
 
                     <x-core::select-dropdown
                         label="{{ __('Status') }}"

@@ -275,6 +275,49 @@ it('menyamarkan NIK dan nomor WhatsApp sebelum dikirim ke AI', function () {
         ->and($prompt)->toContain('[nomor]');
 });
 
+it('meminta AI memisahkan permintaan di luar cakupan dan menandainya tanpa klaster', function () {
+    $period = Period::create(['year' => 2026, 'name' => 'Semester 2']);
+
+    $valid = Submission::create([
+        'period_id' => $period->id,
+        'user_uuid' => (string) Str::uuid(),
+        'type' => 'masyarakat',
+        'data' => ['kebutuhan' => 'Ingin kursus menjahit'],
+    ]);
+    $offTopic = Submission::create([
+        'period_id' => $period->id,
+        'user_uuid' => (string) Str::uuid(),
+        'type' => 'masyarakat',
+        'data' => ['kebutuhan' => 'Jual tanah murah'],
+    ]);
+    $leftover = Submission::create([
+        'period_id' => $period->id,
+        'user_uuid' => (string) Str::uuid(),
+        'type' => 'masyarakat',
+        'data' => ['kebutuhan' => 'asdf'],
+    ]);
+
+    $job = new RunPeriodAnalysisJob((string) Str::uuid(), $period->id);
+    $ids = [$valid->id, $offTopic->id, $leftover->id];
+
+    $prompt = (new ReflectionMethod($job, 'prompt'))->invoke($job, $period, collect([$valid]));
+    (new ReflectionMethod($job, 'persist'))->invoke(
+        $job,
+        $period,
+        [['name' => 'Pelatihan Menjahit', 'submission_ids' => [$valid->id]]],
+        [['submission_id' => $offTopic->id, 'reason' => 'Bukan kebutuhan pelatihan kerja']],
+        $ids,
+    );
+
+    expect($prompt)->toContain('excluded')
+        ->and($prompt)->toContain('tak tepercaya')
+        ->and($valid->fresh()->status)->toBe(Submission::STATUS_PROCESSED)
+        ->and($offTopic->fresh()->status)->toBe(Submission::STATUS_OUT_OF_SCOPE)
+        ->and($offTopic->fresh()->ai_error)->toContain('Bukan kebutuhan pelatihan kerja')
+        ->and($leftover->fresh()->status)->toBe(Submission::STATUS_OUT_OF_SCOPE)
+        ->and(Cluster::query()->count())->toBe(1);
+});
+
 it('menandai log terkirim per kanal tanpa menimpa kegagalan lain', function () {
     $programId = (string) Str::uuid();
     $userUuid = (string) Str::uuid();

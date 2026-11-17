@@ -66,18 +66,44 @@ class Index extends Component
 
         $cluster = $this->cluster($id);
 
-        // Permintaan dikembalikan ke antrean agar bisa dianalisis ulang.
+        // Anggota ditandai di luar cakupan, bukan dikembalikan ke antrean:
+        // kalau pending, analisis berikutnya membuat klaster yang sama lagi.
         Submission::query()
             ->where('cluster_id', $cluster->id)
             ->update([
-                'cluster_id' => null,
-                'status' => Submission::STATUS_PENDING,
+                'status' => Submission::STATUS_OUT_OF_SCOPE,
+                'ai_error' => 'Klaster ditolak admin.',
                 'ai_processed_at' => null,
             ]);
 
         $cluster->forceFill(['status' => Cluster::STATUS_REJECTED])->save();
 
-        $this->dispatch('toast', message: __('Klaster ditolak, permintaan kembali ke antrean.'), type: 'success');
+        $this->dispatch('toast', message: __('Klaster ditolak, permintaannya ditandai di luar cakupan.'), type: 'success');
+    }
+
+    /**
+     * Kebalikan reject(): permintaan masuk lagi ke antrean analisis.
+     */
+    public function restore(string $id): void
+    {
+        $this->authorizeAction('pelatihan.cluster.reject');
+
+        $cluster = $this->cluster($id);
+
+        if ($cluster->status !== Cluster::STATUS_REJECTED) {
+            return;
+        }
+
+        $restored = Submission::query()
+            ->where('cluster_id', $cluster->id)
+            ->update([
+                'cluster_id' => null,
+                'status' => Submission::STATUS_PENDING,
+                'ai_error' => null,
+                'ai_processed_at' => null,
+            ]);
+
+        $this->dispatch('toast', message: __(':count permintaan kembali ke antrean analisis.', ['count' => $restored]), type: 'success');
     }
 
     public function merge(string $id): void

@@ -19,6 +19,8 @@ class Submission extends Model
 
     public const STATUS_FAILED = 'AI_Failed';
 
+    public const STATUS_OUT_OF_SCOPE = 'Out_of_Scope';
+
     protected $table = 'pelatihan_submissions';
 
     protected $fillable = [

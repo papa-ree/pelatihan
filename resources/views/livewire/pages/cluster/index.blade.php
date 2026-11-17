@@ -122,7 +122,7 @@
 
                                             @can('pelatihan.cluster.reject')
                                                 <button type="button" wire:click="reject('{{ $cluster->id }}')"
-                                                    wire:confirm="{{ __('Tolak klaster ini? Permintaannya kembali ke antrean analisis.') }}"
+                                                    wire:confirm="{{ __('Tolak klaster ini? Permintaannya ditandai di luar cakupan.') }}"
                                                     class="rounded-md border border-rose-200 bg-rose-50 px-2 py-1 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 dark:border-rose-800/40 dark:bg-rose-900/20 dark:text-rose-300">
                                                     {{ __('Tolak') }}
                                                 </button>
@@ -150,6 +150,14 @@
                                     <span class="text-xs text-gray-500 dark:text-gray-400">
                                         {{ __('Digabung ke') }} {{ $cluster->mergedInto?->name ?? '—' }}
                                     </span>
+                                @elseif($cluster->status === 'rejected' && $cluster->submissions_count > 0)
+                                    @can('pelatihan.cluster.reject')
+                                        <button type="button" wire:click="restore('{{ $cluster->id }}')"
+                                            wire:confirm="{{ __('Kembalikan permintaan klaster ini ke antrean analisis?') }}"
+                                            class="rounded-md border border-gray-200 px-2 py-1 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">
+                                            {{ __('Kembalikan ke antrean') }}
+                                        </button>
+                                    @endcan
                                 @else
                                     <span class="text-xs text-gray-400">—</span>
                                 @endif

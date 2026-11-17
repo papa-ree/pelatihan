@@ -26,6 +26,10 @@
                     'label' => __('Gagal'),
                     'class' => 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800/40',
                 ],
+                Submission::STATUS_OUT_OF_SCOPE => [
+                    'label' => __('Di luar cakupan'),
+                    'class' => 'bg-indigo-50 text-indigo-700 border-indigo-100 dark:bg-indigo-900/20 dark:text-indigo-400 dark:border-indigo-800/40',
+                ],
                 default => [
                     'label' => __('Menunggu AI'),
                     'class' => 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/40',

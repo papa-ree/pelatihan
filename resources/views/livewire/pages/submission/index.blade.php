@@ -16,7 +16,7 @@
                 placeholder="{{ __('Semua periode') }}" />
         </div>
 
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
             <x-core::stat-card-gradient
                 :label="__('Total Permintaan')"
                 :value="number_format($totalSubmissions)"
@@ -44,6 +44,13 @@
                 icon="triangle-alert"
                 tone="rose"
                 :hint="__('Perlu dijalankan ulang')" />
+
+            <x-core::stat-card-gradient
+                :label="__('Di luar cakupan')"
+                :value="number_format($outOfScopeSubmissions)"
+                icon="circle-slash"
+                tone="indigo"
+                :hint="__('Tidak berkaitan dengan pelatihan')" />
         </div>
 
         <livewire:core-shared-components::data-table

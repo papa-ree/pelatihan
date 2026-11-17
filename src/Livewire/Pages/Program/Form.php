@@ -6,6 +6,7 @@ use Bale\Cms\Services\TenantConnectionService;
 use Bale\Pelatihan\Jobs\SendProgramNotificationToUserJob;
 use Bale\Pelatihan\Models\Cluster;
 use Bale\Pelatihan\Models\NotificationLog;
+use Bale\Pelatihan\Models\Period;
 use Bale\Pelatihan\Models\Program;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -16,6 +17,8 @@ class Form extends Component
 {
     public ?string $programId = null;
 
+    public string $period_id = '';
+
     public string $cluster_id = '';
 
     public int $year;
@@ -25,6 +28,9 @@ class Form extends Component
     public string $name = '';
 
     public string $status = Program::STATUS_DRAFT;
+
+    /** @var array<int, array{label: string, value: string}> */
+    public array $periodOptions = [];
 
     /** @var array<int, array{label: string, value: string}> */
     public array $clusterOptions = [];
@@ -45,8 +51,9 @@ class Form extends Component
         }
 
         $this->programId = $id;
-        $program = Program::findOrFail($id);
+        $program = Program::with('cluster:id,period_id')->findOrFail($id);
 
+        $this->period_id = $program->cluster?->period_id ?? '';
         $this->cluster_id = $program->cluster_id;
         $this->year = $program->year;
         $this->quarter = $program->quarter;
@@ -54,11 +61,19 @@ class Form extends Component
         $this->status = $program->status;
     }
 
+    public function updatedPeriodId(): void
+    {
+        // Klaster berasal dari periode terpilih, jadi pilihan lama tidak valid lagi.
+        $this->cluster_id = '';
+        $this->resetValidation(['period_id', 'cluster_id']);
+    }
+
     public function save(): void
     {
         TenantConnectionService::ensureActive();
 
         $this->validate([
+            'period_id' => 'required|uuid',
             'cluster_id' => 'required|uuid',
             'year' => 'required|integer|min:2000|max:2100',
             'quarter' => 'required|integer|in:1,2,3,4',
@@ -68,7 +83,10 @@ class Form extends Component
 
         // Klaster divalidasi lewat model karena `exists:` akan memakai koneksi
         // default (landlord), bukan koneksi tenant.
-        $cluster = Cluster::query()->approved()->find($this->cluster_id);
+        $cluster = Cluster::query()
+            ->approved()
+            ->where('period_id', $this->period_id)
+            ->find($this->cluster_id);
 
         if (! $cluster) {
             $this->addError('cluster_id', __('Program hanya bisa dibuat dari klaster yang disetujui.'));
@@ -136,16 +154,28 @@ class Form extends Component
     #[Title('Form Program')]
     public function render()
     {
-        $this->clusterOptions = Cluster::query()
-            ->approved()
-            ->with('period')
-            ->orderBy('name')
-            ->get()
-            ->map(fn (Cluster $cluster) => [
-                'label' => $cluster->name.' ('.$cluster->period?->name.')',
-                'value' => $cluster->id,
+        $this->periodOptions = Period::query()
+            ->orderByDesc('year')
+            ->latest('created_at')
+            ->get(['id', 'name', 'year', 'is_active'])
+            ->map(fn (Period $period) => [
+                'label' => $period->name.' ('.$period->year.')'.($period->is_active ? ' · '.__('aktif') : ''),
+                'value' => $period->id,
             ])
             ->all();
+
+        $this->clusterOptions = $this->period_id === ''
+            ? []
+            : Cluster::query()
+                ->approved()
+                ->where('period_id', $this->period_id)
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->map(fn (Cluster $cluster) => [
+                    'label' => $cluster->name,
+                    'value' => $cluster->id,
+                ])
+                ->all();
 
         $logs = $this->programId
             ? NotificationLog::query()
